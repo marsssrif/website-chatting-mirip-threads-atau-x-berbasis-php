@@ -1,8 +1,11 @@
 <?php
 session_start();
+// ... kode yang sudah ada ...
 require_once 'classes/Post.php';
+require_once 'classes/Interaction.php'; // Tambahkan ini
 
 $postObj = new Post();
+$interactionObj = new Interaction(); // Inisialisasi Class baru
 
 // Jika form "Meow" disubmit (Menggunakan POST)
 if (isset($_POST['submit_post']) && isset($_SESSION['user_id'])) {
@@ -15,8 +18,34 @@ if (isset($_POST['submit_post']) && isset($_SESSION['user_id'])) {
     }
 }
 
-// Ambil semua data postingan
+// ... [Kode submit_post yang sudah ada] ...
+
+// Jika ada permintaan Hapus Meow (Metode GET)
+if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
+    $post_id = $_GET['delete_id'];
+    $user_id = $_SESSION['user_id'];
+
+    $postObj->deletePost($post_id, $user_id);
+    header("Location: home.php"); // Refresh setelah dihapus
+    exit;
+}
+
+if (isset($_GET['like_id'])) {
+    if (!isset($_SESSION['user_id'])) {
+        // Jika visitor mencoba like
+        echo "<script>alert('Meow-af, silakan login untuk menyukai Meow ini!'); window.location.href='index.php';</script>";
+        exit;
+    }
+
+    // Jika user sudah login, jalankan toggle like
+    $interactionObj->toggleLike($_SESSION['user_id'], $_GET['like_id']);
+    header("Location: home.php");
+    exit;
+}
+// =====================================
+
 $all_posts = $postObj->getAllPosts();
+
 ?>
 
 <!DOCTYPE html>
@@ -167,13 +196,43 @@ $all_posts = $postObj->getAllPosts();
                 </div>
             <?php endif; ?>
 
+
+
             <?php foreach ($all_posts as $post): ?>
                 <div class="feed-post">
-                    <img src="uploads/avatars/<?php echo $post['profile_pic']; ?>" class="avatar" alt="ava" onerror="this.src='https://via.placeholder.com/50'">
-                    <div class="post-content">
-                        <h4><?php echo htmlspecialchars($post['name']); ?></h4>
-                        <span>@<?php echo htmlspecialchars($post['username']); ?></span>
-                        <p><?php echo htmlspecialchars($post['content']); ?></p>
+                    <a href="profile.php?username=<?php echo urlencode($post['username']); ?>">
+                        <img src="uploads/avatars/<?php echo $post['profile_pic']; ?>" class="avatar" alt="ava" onerror="this.src='https://via.placeholder.com/50'">
+                    </a>
+                    <div class="post-content" style="width: 100%;">
+
+                        <div>
+                            <a href="profile.php?username=<?php echo urlencode($post['username']); ?>" style="text-decoration: none; color: inherit;">
+                                <h4 style="margin: 0; display: inline-block; cursor: pointer;"><?php echo htmlspecialchars($post['name']); ?></h4>
+                                <span style="color: #888; font-size: 14px; cursor: pointer;"> @<?php echo htmlspecialchars($post['username']); ?></span>
+                            </a>
+
+                            <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $post['user_id']): ?>
+                                <a href="home.php?delete_id=<?php echo $post['id']; ?>" onclick="return confirm('Yakin ingin menghapus Meow ini?')" style="color: red; text-decoration: none; font-size: 12px; float: right;">🗑️ Hapus</a>
+                            <?php endif; ?>
+                        </div>
+
+                        <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($post['content']); ?></p>
+
+                        <?php
+                        // Ambil jumlah like dan status user
+                        $like_count = $interactionObj->getLikeCount($post['id']);
+                        $current_user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+                        $is_liked = $interactionObj->isLikedByUser($current_user_id, $post['id']);
+                        ?>
+
+                        <div style="margin-top: 15px;">
+                            <a href="home.php?like_id=<?php echo $post['id']; ?>" style="text-decoration: none; font-size: 14px; color: #555;">
+                                <?php echo $is_liked ? '❤️' : '🤍'; ?>
+                                <span style="<?php echo $is_liked ? 'color: red; font-weight: bold;' : ''; ?>">
+                                    <?php echo $like_count; ?>
+                                </span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>

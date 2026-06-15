@@ -71,4 +71,13 @@ class User
         $query = "UPDATE users SET name='$name', bio='$bio', profile_pic='$profile_pic', header_pic='$header_pic' WHERE id='$id'";
         return $this->db->query($query);
     }
+
+    // Fungsi Ambil Data Profil Berdasarkan Username (URL GET)
+    public function getUserByUsername($username)
+    {
+        $username = $this->db->real_escape_string($username);
+        $query = "SELECT * FROM users WHERE username = '$username'";
+        $result = $this->db->query($query);
+        return $result->fetch_assoc();
+    }
 }
