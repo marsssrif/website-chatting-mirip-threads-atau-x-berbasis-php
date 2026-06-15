@@ -113,4 +113,27 @@ class Post
         $query = "INSERT INTO posts (user_id, content, parent_id) VALUES ('$user_id', '$content', '$parent_id')";
         return $this->db->query($query);
     }
+
+    // Fungsi Mencari Kiriman Berdasarkan Kata Kunci (Materi SQL LIKE)
+    public function searchPosts($keyword)
+    {
+        $keyword = $this->db->real_escape_string($keyword);
+
+        // Query mencari teks content yang mengandung keyword, khusus Meow Utama (parent_id IS NULL)
+        $query = "SELECT posts.*, users.name, users.username, users.profile_pic 
+                  FROM posts 
+                  JOIN users ON posts.user_id = users.id 
+                  WHERE posts.parent_id IS NULL AND posts.content LIKE '%$keyword%'
+                  ORDER BY posts.created_at DESC";
+
+        $result = $this->db->query($query);
+
+        $posts = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $posts[] = $row;
+            }
+        }
+        return $posts;
+    }
 }

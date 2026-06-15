@@ -80,4 +80,26 @@ class User
         $result = $this->db->query($query);
         return $result->fetch_assoc();
     }
+
+    // Fungsi mengambil daftar User dengan total akumulasi Likes terbanyak (Materi Agregasi SQL)
+    public function getTopLikedUsers($limit = 3)
+    {
+        $query = "SELECT users.id, users.name, users.username, users.profile_pic, COUNT(likes.id) as total_likes
+                  FROM users
+                  JOIN posts ON users.id = posts.user_id
+                  JOIN likes ON posts.id = likes.post_id
+                  GROUP BY users.id
+                  ORDER BY total_likes DESC
+                  LIMIT $limit";
+
+        $result = $this->db->query($query);
+
+        $top_users = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $top_users[] = $row;
+            }
+        }
+        return $top_users;
+    }
 }

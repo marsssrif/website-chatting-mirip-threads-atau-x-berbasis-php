@@ -56,7 +56,16 @@ if (isset($_GET['like_id'])) {
 }
 // =====================================
 
-$all_posts = $postObj->getAllPosts();
+// === LOGIKA FILTER TIMELINE / SEARCH ===
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $keyword = $_GET['search'];
+    // Jika ada parameter search, panggil fungsi pencarian LIKE MySQL
+    $all_posts = $postObj->searchPosts($keyword);
+} else {
+    // Jika tidak ada pencarian, tampilkan semua postingan seperti biasa
+    $all_posts = $postObj->getAllPosts();
+}
+// =======================================
 
 ?>
 
@@ -338,7 +347,7 @@ $all_posts = $postObj->getAllPosts();
 
 
             <?php foreach ($all_posts as $post): ?>
-                <div class="feed-post">
+                <div class="feed-post" id="post-<?php echo $post['id']; ?>">
                     <a href="profile.php?username=<?php echo urlencode($post['username']); ?>">
                         <img src="uploads/avatars/<?php echo $post['profile_pic']; ?>" class="avatar" alt="ava" onerror="this.src='https://via.placeholder.com/50'">
                     </a>
@@ -364,7 +373,7 @@ $all_posts = $postObj->getAllPosts();
                                     <img src="uploads/posts/<?php echo $post['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
 
                                     <div style="margin-top: 5px;">
-                                        <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">📥 Download Gambar</a>
+                                        <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">Download Gambar</a>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -377,7 +386,7 @@ $all_posts = $postObj->getAllPosts();
                         ?>
 
                         <div style="margin-top: 15px; display: flex; gap: 20px;">
-                            <a href="home.php?like_id=<?php echo $post['id']; ?>" style="text-decoration: none; font-size: 14px; color: #555;">
+                            <a href="home.php?like_id=<?php echo $post['id']; ?>#post-<?php echo $post['id']; ?>" style="text-decoration: none; font-size: 14px; color: #555;">
                                 <?php echo $is_liked ? '❤️' : '🤍'; ?>
                                 <span style="<?php echo $is_liked ? 'color: red; font-weight: bold;' : ''; ?>">
                                     <?php echo $like_count; ?>

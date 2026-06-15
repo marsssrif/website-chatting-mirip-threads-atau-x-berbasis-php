@@ -1,8 +1,12 @@
 <?php
 session_start();
+// Membaca cookie preferensi tema (Default: light)
+$theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
+
 require_once 'classes/User.php';
 require_once 'classes/Post.php';
 require_once 'classes/Interaction.php';
+require_once 'classes/Flash.php'; // Pastikan class Flash di-include
 
 $postObj = new Post();
 $interactionObj = new Interaction();
@@ -22,15 +26,19 @@ if (!$main_post) {
     exit;
 }
 
+// Penangkap aksi hapus (Meow Utama maupun Balasan)
 if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
     $id_to_delete = $_GET['delete_id'];
     $user_id = $_SESSION['user_id'];
 
-    // Eksekusi hapus
-    // ... dalam logika delete ...
     $postObj->deletePost($id_to_delete, $user_id);
     Flash::set('success', 'Meow berhasil dihapus!');
-    header("Location: post_detail.php?id=" . $post_id); // atau home.php
+
+    if ($id_to_delete == $post_id) {
+        header("Location: home.php");
+    } else {
+        header("Location: post_detail.php?id=" . $post_id);
+    }
     exit;
 }
 
@@ -60,8 +68,6 @@ if (isset($_GET['like_id'])) {
 $replies = $postObj->getRepliesByPostId($post_id);
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="id">
 
@@ -73,6 +79,7 @@ $replies = $postObj->getRepliesByPostId($post_id);
             font-family: 'Segoe UI', Tahoma, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
+            transition: background 0.3s, color 0.3s;
         }
 
         .layout-container {
@@ -178,7 +185,7 @@ $replies = $postObj->getRepliesByPostId($post_id);
         .flash-msg {
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin: 15px 20px 0 20px;
             font-weight: bold;
             text-align: center;
         }
@@ -194,10 +201,52 @@ $replies = $postObj->getRepliesByPostId($post_id);
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* === STYLING UNTUK INDIKATOR DARK MODE DI POST DETAIL === */
+        body.dark-mode {
+            background-color: #15202b;
+            color: #ffffff;
+        }
+
+        body.dark-mode .mid-col,
+        body.dark-mode .left-col,
+        body.dark-mode .right-col {
+            background-color: #15202b;
+            border-color: #38444d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .header-title,
+        body.dark-mode .reply-form {
+            background-color: #15202b;
+            border-color: #38444d;
+            color: #ffffff;
+        }
+
+        body.dark-mode .main-post {
+            background-color: #1e2d3b;
+            border-color: #38444d;
+        }
+
+        body.dark-mode .feed-post {
+            border-color: #38444d;
+        }
+
+        body.dark-mode .main-post h4,
+        body.dark-mode .feed-post h4,
+        body.dark-mode .left-col a {
+            color: #ffffff;
+        }
+
+        body.dark-mode .reply-form textarea {
+            background-color: #192734;
+            border-color: #38444d;
+            color: #ffffff;
+        }
     </style>
 </head>
 
-<body>
+<body class="<?php echo $theme_preference == 'dark' ? 'dark-mode' : ''; ?>">
 
     <div class="layout-container">
         <div class="left-col">
@@ -206,17 +255,39 @@ $replies = $postObj->getRepliesByPostId($post_id);
 
         <div class="mid-col">
             <div class="header-title">
-                <a href="home.php" style="text-decoration:none; color:black; margin-right:15px;">⬅️ Meow</a>
+                <a href="home.php" style="text-decoration:none; color:inherit; margin-right:15px;">⬅ Meow</a>
             </div>
+
+            <?php
+            $flash = Flash::get();
+            if ($flash) {
+                echo "<div class='flash-msg " . ($flash['type'] == 'success' ? 'success' : 'error') . "'>{$flash['message']}</div>";
+            }
+            ?>
 
             <div class="main-post">
                 <a href="profile.php?username=<?php echo urlencode($main_post['username']); ?>">
-                    <img src="uploads/avatars/<?php echo $main_post['profile_pic']; ?>" class="avatar">
+                    <img src="uploads/avatars/<?php echo $main_post['profile_pic']; ?>" class="avatar" onerror="this.src='uploads/avatars/default_avatar.png'">
                 </a>
                 <div style="width: 100%;">
-                    <h4 style="margin: 0; font-size: 18px;"><?php echo htmlspecialchars($main_post['name']); ?></h4>
+                    <div style="display: flow-root;">
+                        <h4 style="margin: 0; font-size: 18px; display: inline-block;"><?php echo htmlspecialchars($main_post['name']); ?></h4>
+
+                        <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $main_post['user_id']): ?>
+                            <a href="post_detail.php?id=<?php echo $post_id; ?>&delete_id=<?php echo $main_post['id']; ?>" onclick="return confirm('Yakin ingin menghapus Meow ini?')" style="color: red; text-decoration: none; font-size: 12px; float: right;">🗑️ Hapus</a>
+                        <?php endif; ?>
+                    </div>
                     <span style="color: #888;">@<?php echo htmlspecialchars($main_post['username']); ?></span>
-                    <p style="font-size: 20px; line-height: 1.5;"><?php echo htmlspecialchars($main_post['content']); ?></p>
+                    <p style="font-size: 20px; line-height: 1.5; margin: 10px 0;"><?php echo htmlspecialchars($main_post['content']); ?></p>
+
+                    <?php if (!empty($main_post['post_image'])): ?>
+                        <div style="margin-top: 10px; margin-bottom: 15px;">
+                            <img src="uploads/posts/<?php echo $main_post['post_image']; ?>" style="max-width: 100%; max-height: 350px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
+                            <div style="margin-top: 5px;">
+                                <a href="download.php?file=<?php echo urlencode($main_post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">Download Gambar</a>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
                     <?php
                     $like_count = $interactionObj->getLikeCount($main_post['id']);
@@ -247,10 +318,9 @@ $replies = $postObj->getRepliesByPostId($post_id);
             <?php foreach ($replies as $reply): ?>
                 <div class="feed-post">
                     <a href="profile.php?username=<?php echo urlencode($reply['username']); ?>">
-                        <img src="uploads/avatars/<?php echo $reply['profile_pic']; ?>" class="avatar">
+                        <img src="uploads/avatars/<?php echo $reply['profile_pic']; ?>" class="avatar" onerror="this.src='uploads/avatars/default_avatar.png'">
                     </a>
                     <div style="width: 100%;">
-
                         <div>
                             <h4 style="margin: 0; display: inline-block;"><?php echo htmlspecialchars($reply['name']); ?></h4>
                             <span style="color: #888;">@<?php echo htmlspecialchars($reply['username']); ?></span>
@@ -261,12 +331,12 @@ $replies = $postObj->getRepliesByPostId($post_id);
                         </div>
 
                         <p style="margin: 10px 0 0 0; line-height: 1.5;"><?php echo htmlspecialchars($reply['content']); ?></p>
-                        <?php if (!empty($post['post_image'])): ?>
-                            <div style="margin-top: 10px;">
-                                <img src="uploads/posts/<?php echo $post['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
 
+                        <?php if (!empty($reply['post_image'])): ?>
+                            <div style="margin-top: 10px;">
+                                <img src="uploads/posts/<?php echo $reply['post_image']; ?>" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">
                                 <div style="margin-top: 5px;">
-                                    <a href="download.php?file=<?php echo urlencode($post['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">📥 Download Gambar</a>
+                                    <a href="download.php?file=<?php echo urlencode($reply['post_image']); ?>" style="text-decoration: none; font-size: 12px; color: #ff914d; font-weight: bold;">Download Gambar</a>
                                 </div>
                             </div>
                         <?php endif; ?>
