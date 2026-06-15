@@ -1,0 +1,56 @@
+<?php
+// Memanggil file koneksi database
+require_once 'Database.php';
+
+class User
+{
+    private $db;
+
+    public function __construct()
+    {
+        $database = new Database();
+        $this->db = $database->getConnection();
+    }
+
+    // Fungsi untuk Registrasi (Daftar Akun Baru)
+    public function register($username, $password, $name)
+    {
+        // Mencegah error karakter aneh (SQL Injection dasar)
+        $username = $this->db->real_escape_string($username);
+        $name = $this->db->real_escape_string($name);
+
+        // Enkripsi password menggunakan md5 (Sesuai Materi Modul Lanjut)
+        $hashed_password = md5($password);
+
+        $query = "INSERT INTO users (username, password, name) VALUES ('$username', '$hashed_password', '$name')";
+
+        if ($this->db->query($query)) {
+            return true; // Berhasil
+        }
+        return false; // Gagal (biasanya karena username sudah dipakai, karena kita set UNIQUE di database)
+    }
+
+    // Fungsi untuk Login
+    public function login($username, $password)
+    {
+        $username = $this->db->real_escape_string($username);
+        $hashed_password = md5($password);
+
+        $query = "SELECT * FROM users WHERE username = '$username' AND password = '$hashed_password'";
+        $result = $this->db->query($query);
+
+        // Jika data ditemukan (username dan password cocok)
+        if ($result->num_rows > 0) {
+            $user_data = $result->fetch_assoc();
+
+            // Set Session (Sesuai Materi Modul 11-12)
+            session_start();
+            $_SESSION['user_id'] = $user_data['id'];
+            $_SESSION['username'] = $user_data['username'];
+            $_SESSION['name'] = $user_data['name'];
+
+            return true;
+        }
+        return false;
+    }
+}
