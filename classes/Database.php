@@ -6,7 +6,7 @@ class Database
     private $host = "localhost";
     private $user = "root";
     private $pass = "";
-    private $db_name = "db_chirper";
+    private $db_name = "tugasakhirppw";
     public $conn;
 
     // Konstruktor akan otomatis dipanggil saat class ini diinisialisasi (Materi OOP)

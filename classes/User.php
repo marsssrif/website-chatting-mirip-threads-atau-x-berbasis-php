@@ -53,4 +53,22 @@ class User
         }
         return false;
     }
+
+    // Fungsi Ambil Data Profil Berdasarkan ID
+    public function getUserById($id)
+    {
+        $query = "SELECT * FROM users WHERE id = '$id'";
+        $result = $this->db->query($query);
+        return $result->fetch_assoc();
+    }
+
+    // Fungsi Update Profil (Nama, Bio, Foto, Header)
+    public function updateProfile($id, $name, $bio, $profile_pic, $header_pic)
+    {
+        $name = $this->db->real_escape_string($name);
+        $bio = $this->db->real_escape_string($bio);
+
+        $query = "UPDATE users SET name='$name', bio='$bio', profile_pic='$profile_pic', header_pic='$header_pic' WHERE id='$id'";
+        return $this->db->query($query);
+    }
 }

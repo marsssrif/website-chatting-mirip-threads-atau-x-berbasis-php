@@ -11,19 +11,26 @@ if (isset($_SESSION['user_id'])) {
 require_once 'classes/User.php';
 $userObj = new User();
 
-$error_msg = "";
-$success_msg = "";
+// Memisahkan pesan agar tidak tertukar antara form login dan register
+$login_error = "";
+$register_error = "";
+$register_success = "";
+
+// Variabel untuk melacak form mana yang terakhir dibuka
+$show_register = false;
 
 // 1. Menangkap Method POST dari Form Registrasi
 if (isset($_POST['register'])) {
+    $show_register = true; // Tetap buka form register setelah disubmit
     $name = $_POST['name'];
     $username = $_POST['username'];
     $password = $_POST['password'];
 
     if ($userObj->register($username, $password, $name)) {
-        $success_msg = "Pendaftaran berhasil! Silakan Login purr-fectly.";
+        $register_success = "Pendaftaran berhasil! Silakan Masuk, Meow!";
+        $show_register = false; // Jika sukses, arahkan kembali ke form Login
     } else {
-        $error_msg = "Meow-af, Username sudah digunakan!";
+        $register_error = "Meow-af, Username sudah digunakan!";
     }
 }
 
@@ -33,11 +40,10 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
 
     if ($userObj->login($username, $password)) {
-        // Jika login sukses, pergi ke home.php
         header("Location: home.php");
         exit;
     } else {
-        $error_msg = "Meow-af, Username atau Password salah!";
+        $login_error = "Meow-af, Username atau Password salah!";
     }
 }
 ?>
@@ -74,7 +80,6 @@ if (isset($_POST['login'])) {
             margin-bottom: 5px;
         }
 
-        /* Warna Oranye Kucing */
         p {
             color: #666;
             margin-bottom: 20px;
@@ -88,6 +93,7 @@ if (isset($_POST['login'])) {
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         button {
@@ -101,6 +107,7 @@ if (isset($_POST['login'])) {
             font-weight: bold;
             font-size: 16px;
             transition: 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -139,31 +146,34 @@ if (isset($_POST['login'])) {
 
 <body>
 
-    <div class="container" id="login-box">
+    <div class="container" id="login-box" style="display: <?php echo $show_register ? 'none' : 'block'; ?>;">
         <h1>🐱 Meower</h1>
         <p>Bagikan "Meow" mu ke seluruh dunia!</p>
 
-        <?php if ($error_msg) echo "<div class='msg error'>$error_msg</div>"; ?>
-        <?php if ($success_msg) echo "<div class='msg success'>$success_msg</div>"; ?>
+        <?php if ($login_error) echo "<div class='msg error'>$login_error</div>"; ?>
+        <?php if ($register_success) echo "<div class='msg success'>$register_success</div>"; ?>
 
         <form method="POST" action="">
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit" name="login">Masuk</button>
         </form>
-        <span class="toggle-link" onclick="toggleForms()">Belum punya akun? Daftar di sini</span>
+        <span class="toggle-link" onclick="toggleForms()">Belum punya akun? Daftar di sini!</span>
     </div>
 
-    <div class="container" id="register-box" style="display: none;">
+    <div class="container" id="register-box" style="display: <?php echo $show_register ? 'block' : 'none'; ?>;">
         <h1>🐱 Daftar Meower</h1>
         <p>Gabung bersama para kucing lainnya!</p>
+
+        <?php if ($register_error) echo "<div class='msg error'>$register_error</div>"; ?>
+
         <form method="POST" action="">
-            <input type="text" name="name" placeholder="Nama Lengkap" required>
+            <input type="text" name="name" placeholder="Display Name" required>
             <input type="text" name="username" placeholder="Username (Tanpa Spasi)" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit" name="register">Daftar</button>
         </form>
-        <span class="toggle-link" onclick="toggleForms()">Sudah punya akun? Masuk di sini</span>
+        <span class="toggle-link" onclick="toggleForms()">Sudah punya akun? Masuk di sini!</span>
     </div>
 
     <script>
