@@ -205,6 +205,65 @@ $all_posts = $postObj->getAllPosts();
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        /* Sembunyikan input file bawaan browser yang kaku */
+        .input-file-hidden {
+            display: none;
+        }
+
+        /* Buat tombol kustom dengan ikon/emoji */
+        .custom-file-upload {
+            display: inline-block;
+            padding: 8px 15px;
+            cursor: pointer;
+            background: #fff0ea;
+            color: #ff914d;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+            border: 1px dashed #ff914d;
+            transition: background 0.2s;
+        }
+
+        .custom-file-upload:hover {
+            background: #ffe3dc;
+        }
+
+        /* Wadah penampung preview gambar sebelum di-post */
+        .preview-container {
+            margin-top: 15px;
+            position: relative;
+            display: none;
+            /* Sembunyikan jika belum ada gambar dipilih */
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+
+        /* Tombol X untuk membatalkan pilihan gambar */
+        .btn-remove-preview {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 25px;
+            text-align: center;
+            padding: 0;
+        }
     </style>
 </head>
 
@@ -221,13 +280,55 @@ $all_posts = $postObj->getAllPosts();
 
             <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="post-form">
-                    <form method="POST" action="" enctype="multipart/form-data">
+                    <form method="POST" action="" enctype="multipart/form-data" id="meowForm">
                         <textarea name="content" rows="3" placeholder="Apa yang sedang kamu pikirkan, Meow?" required></textarea>
-                        <button type="submit" name="submit_post" class="btn-meow">Meow</button>
-                        <input type="file" name="post_img" accept="image/png, image/jpeg" class="btn-upload">
 
+                        <div class="preview-container" id="previewWrapper">
+                            <button type="button" class="btn-remove-preview" id="cancelPreview">✕</button>
+                            <img src="" id="imagePreview" alt="Preview Gambar">
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label for="post_img" class="custom-file-upload">
+                                🖼️ Tambah Gambar
+                            </label>
+                            <input type="file" name="post_img" id="post_img" accept="image/png, image/jpeg" class="input-file-hidden">
+
+                            <button type="submit" name="submit_post" class="btn-meow">Meow</button>
+                        </div>
                     </form>
                 </div>
+
+                <script>
+                    const fileInput = document.getElementById('post_img');
+                    const previewWrapper = document.getElementById('previewWrapper');
+                    const imagePreview = document.getElementById('imagePreview');
+                    const cancelPreview = document.getElementById('cancelPreview');
+
+                    // Mendengarkan perubahan jika user memilih file gambar
+                    fileInput.addEventListener('change', function() {
+                        const file = this.files[0];
+
+                        if (file) {
+                            const reader = new FileReader();
+
+                            // Saat file selesai dibaca oleh browser, tampilkan ke tag img preview
+                            reader.addEventListener('load', function() {
+                                imagePreview.setAttribute('src', this.result);
+                                previewWrapper.style.display = 'block'; // Tampilkan wadah preview
+                            });
+
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    // Jika tombol ✕ ditekan, batalkan pilihan gambar
+                    cancelPreview.addEventListener('click', function() {
+                        fileInput.value = ""; // Kosongkan file input asli
+                        imagePreview.setAttribute('src', '');
+                        previewWrapper.style.display = 'none'; // Sembunyikan kembali wadah preview
+                    });
+                </script>
             <?php else: ?>
                 <div class="post-form" style="text-align:center; color:#888;">
                     <p>Silakan login untuk membagikan Meow-mu.</p>
