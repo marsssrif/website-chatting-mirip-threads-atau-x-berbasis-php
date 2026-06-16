@@ -245,7 +245,7 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
                 const reader = new FileReader();
                 reader.addEventListener('load', function() {
                     modalImagePreview.setAttribute('src', this.result);
-                    modalPreviewWrapper.style.display = 'block';
+                    modalPreviewWrapper.style.display = 'inline-block';
                 });
                 reader.readAsDataURL(file);
             }

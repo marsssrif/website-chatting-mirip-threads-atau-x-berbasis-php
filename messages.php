@@ -18,13 +18,8 @@ $userObj = new User();
 
 $current_user_id = $_SESSION['user_id'];
 
-// Ambil daftar users untuk dichat (Popular meowers & user lainnya)
-$contacts = $userObj->getTopLikedUsers(5); // Ambil 5 user top
-
-// Hapus user diri sendiri dari list kontak jika ada
-$contacts = array_filter($contacts, function($u) use ($current_user_id) {
-    return $u['id'] != $current_user_id;
-});
+// Ambil daftar users untuk dichat (Diurutkan berdasarkan chat terbaru/interaksi terakhir)
+$contacts = $userObj->getChatContacts($current_user_id);
 
 // Ambil contact_id aktif dari URL GET
 $active_contact_id = isset($_GET['contact_id']) ? (int)$_GET['contact_id'] : null;
