@@ -165,7 +165,7 @@ if (isset($_GET['feed']) && $_GET['feed'] == 'ghost') {
                             // Saat file selesai dibaca oleh browser, tampilkan ke tag img preview
                             reader.addEventListener('load', function() {
                                 imagePreview.setAttribute('src', this.result);
-                                previewWrapper.style.display = 'block'; // Tampilkan wadah preview
+                                previewWrapper.style.display = 'inline-block'; // Tampilkan wadah preview
                             });
 
                             reader.readAsDataURL(file);

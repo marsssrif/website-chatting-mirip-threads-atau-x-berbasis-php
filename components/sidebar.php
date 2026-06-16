@@ -81,15 +81,9 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
             <span class="feeds-title">Feeds</span>
             <a href="#" class="feeds-edit" onclick="event.preventDefault();">Edit</a>
         </div>
-        <a href="home.php" class="sub-feed-link <?php echo ($is_home && !isset($_GET['feed'])) ? 'active' : ''; ?>">
-            <span>Following</span>
-        </a>
         <a href="home.php?feed=ghost" class="sub-feed-link <?php echo $is_ghost_feed ? 'active' : ''; ?>">
             <span>Ghost posts</span>
             <i class="bi bi-ghost"></i>
-        </a>
-        <a href="home.php?search=technology" class="sub-feed-link <?php echo $is_tech_feed ? 'active' : ''; ?>">
-            <span>technology</span>
         </a>
     </div>
 
