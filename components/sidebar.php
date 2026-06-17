@@ -8,18 +8,15 @@ $is_search = ($current_page == 'home.php' && isset($_GET['search']) && $_GET['se
 $is_profile = ($current_page == 'profile.php');
 $is_edit_profile = ($current_page == 'edit_profile.php');
 $is_messages = ($current_page == 'messages.php');
-$is_activity = ($current_page == 'activity.php');
 $is_insights = ($current_page == 'insights.php');
 $is_saved = ($current_page == 'saved.php');
 $is_ghost_feed = ($current_page == 'home.php' && isset($_GET['feed']) && $_GET['feed'] == 'ghost');
 $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET['search'] == 'technology');
 ?>
 <div class="sidebar">
-    <!-- Brand Logo (Threads spiral style) -->
+    <!-- Brand Logo -->
     <a href="home.php" class="sidebar-logo">
-        <svg viewBox="0 0 24 24">
-            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10c2.785 0 5.439-1.123 7.385-3.116a1 1 0 1 0-1.458-1.37A7.957 7.957 0 0 1 12 20c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8v1.309c0 .942-.294 1.341-.572 1.503-.186.108-.5.188-.928.188-.707 0-1.293-.41-1.479-1.036l-.372-1.25A5.962 5.962 0 0 1 12 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5v3.131c0 2.215 1.583 3.869 3.807 3.869.839 0 1.637-.23 2.308-.622.95-.553 1.516-1.597 1.516-2.937V12c0-5.523-4.477-10-10-10zm0 10c-1.654 0-3-1.346-3-3s1.346-3 3-3 3 1.346 3 3-1.346 3-3 3z"/>
-        </svg>
+        <img src="uploads/logo.png" alt="Logo" class="logo-img">
         <span>meower</span>
     </a>
 
@@ -45,11 +42,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         <a href="messages.php" class="sidebar-link <?php echo $is_messages ? 'active' : ''; ?>">
             <i class="bi bi-chat"></i>
             <span>Messages</span>
-        </a>
-
-        <a href="activity.php" class="sidebar-link <?php echo $is_activity ? 'active' : ''; ?>">
-            <i class="bi bi-heart"></i>
-            <span>Activity</span>
         </a>
 
         <a href="profile.php?username=<?php echo $_SESSION['username']; ?>" class="sidebar-link <?php echo ($is_profile || $is_edit_profile) ? 'active' : ''; ?>">
@@ -155,7 +147,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
 </div>
 
 <script>
-    // More Popover Toggle
     const moreBtn = document.getElementById('more-menu-btn');
     const popover = document.getElementById('more-popover');
 
@@ -165,7 +156,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
             popover.classList.toggle('show');
         });
 
-        // Close popover on click outside
         document.addEventListener('click', (e) => {
             if (!popover.contains(e.target) && e.target !== moreBtn && !moreBtn.contains(e.target)) {
                 popover.classList.remove('show');
@@ -173,7 +163,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         });
     }
 
-    // Theme Toggle inside Popover
     const themeBtn = document.getElementById('theme-toggle-btn');
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -181,14 +170,12 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
             const isDark = document.body.classList.contains('dark-mode');
             document.cookie = "theme=" + (isDark ? "dark" : "light") + "; path=/; max-age=31536000";
             
-            // Update icon inside theme button
             const icon = themeBtn.querySelector('i');
             if (icon) {
                 icon.className = isDark ? 'bi bi-sun' : 'bi bi-moon-stars';
             }
         });
         
-        // Initial icon update on load
         const setupThemeIcon = () => {
             const isDark = document.body.classList.contains('dark-mode');
             const icon = themeBtn.querySelector('i');
@@ -204,14 +191,12 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         }
     }
 
-    // "New thread" Modal Toggle & Handlers
     const newThreadBtn = document.getElementById('new-thread-btn');
     const newThreadModal = document.getElementById('newThreadModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     
     if (newThreadBtn && newThreadModal) {
         newThreadBtn.addEventListener('click', (e) => {
-            // Jika ada form bawaan di halaman (misal home.php), kita prioritaskan modal
             e.preventDefault();
             newThreadModal.style.display = 'flex';
             const textarea = newThreadModal.querySelector('textarea');
@@ -224,7 +209,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
             newThreadModal.style.display = 'none';
         });
         
-        // Close on background backdrop click
         newThreadModal.addEventListener('click', (e) => {
             if (e.target === newThreadModal) {
                 newThreadModal.style.display = 'none';
@@ -232,7 +216,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         });
     }
 
-    // Modal Image Preview logic
     const modalFileInput = document.getElementById('modal_post_img');
     const modalPreviewWrapper = document.getElementById('modalPreviewWrapper');
     const modalImagePreview = document.getElementById('modalImagePreview');
@@ -260,7 +243,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         });
     }
 
-    // "Search" button scroll/focus helper
     const searchBtn = document.getElementById('sidebar-search-btn');
     if (searchBtn) {
         searchBtn.addEventListener('click', (e) => {
@@ -273,7 +255,6 @@ $is_tech_feed = ($current_page == 'home.php' && isset($_GET['search']) && $_GET[
         });
     }
 
-    // Focus elements on page load (Fix DOMContentLoaded race condition)
     function handleFocusOnLoad() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('focus') === 'post') {

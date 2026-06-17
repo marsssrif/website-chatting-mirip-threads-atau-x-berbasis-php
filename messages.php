@@ -1,9 +1,7 @@
 <?php
 session_start();
-// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
 $theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 
-// Proteksi halaman: Pengunjung Wajib Login!
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -18,10 +16,8 @@ $userObj = new User();
 
 $current_user_id = $_SESSION['user_id'];
 
-// Ambil daftar users untuk dichat (Diurutkan berdasarkan chat terbaru/interaksi terakhir)
 $contacts = $userObj->getChatContacts($current_user_id);
 
-// Ambil contact_id aktif dari URL GET
 $active_contact_id = isset($_GET['contact_id']) ? (int)$_GET['contact_id'] : null;
 $active_contact = null;
 
@@ -32,13 +28,11 @@ if ($active_contact_id) {
     }
 }
 
-// Proses kirim pesan (POST)
 if (isset($_POST['send_message']) && $active_contact_id) {
     $msg_content = trim($_POST['message_text']);
     if (!empty($msg_content)) {
         $msg_content = $conn->real_escape_string($msg_content);
         
-        // 1. Simpan pesan pengirim
         $conn->query("INSERT INTO messages (sender_id, receiver_id, message) VALUES ('$current_user_id', '$active_contact_id', '$msg_content')");
         
         header("Location: messages.php?contact_id=" . $active_contact_id);
@@ -46,7 +40,6 @@ if (isset($_POST['send_message']) && $active_contact_id) {
     }
 }
 
-// Ambil history chat jika ada kontak aktif
 $messages = [];
 if ($active_contact_id) {
     $msg_query = "SELECT * FROM messages 
@@ -69,6 +62,7 @@ if ($active_contact_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages / Meower</title>
+    <link rel="icon" type="image/png" href="uploads/logo.png">
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -287,7 +281,6 @@ if ($active_contact_id) {
                     const chatHistory = document.getElementById('chatHistory');
                     if (!chatHistory) return;
                     
-                    // Check if user is scrolled to bottom (or close to it)
                     const isAtBottom = chatHistory.scrollHeight - chatHistory.clientHeight <= chatHistory.scrollTop + 60;
                     
                     let html = '';
@@ -310,7 +303,6 @@ if ($active_contact_id) {
                     
                     chatHistory.innerHTML = html;
                     
-                    // Always force scroll down on initial load or if user is already at bottom
                     if (isAtBottom || !chatHistory.dataset.loaded) {
                         chatHistory.scrollTop = chatHistory.scrollHeight;
                         chatHistory.dataset.loaded = "true";
@@ -329,15 +321,12 @@ if ($active_contact_id) {
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
 
-        // Initial load
         loadMessages();
 
-        // Polling interval (1.5 seconds)
         if (activeContactId) {
             setInterval(loadMessages, 1500);
         }
 
-        // AJAX submit intercept
         const chatForm = document.getElementById('chatForm');
         if (chatForm) {
             chatForm.addEventListener('submit', (e) => {
@@ -362,8 +351,7 @@ if ($active_contact_id) {
                     if (data.status === 'success') {
                         input.value = '';
                         input.focus();
-                        loadMessages(); // Refresh chat immediately
-                    }
+                        loadMessages();                    }
                 })
                 .catch(err => {
                     input.disabled = false;

@@ -15,12 +15,12 @@ header('Content-Type: application/json');
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 if ($action == 'get_messages') {
-    $contact_id = isset($_GET['contact_id']) ? (int)$_GET['contact_id'] : 0;
+    $contact_id = isset($_GET['contact_id']) ? (int) $_GET['contact_id'] : 0;
     if (!$contact_id) {
         echo json_encode([]);
         exit;
     }
-    
+
     $query = "SELECT * FROM messages 
               WHERE (sender_id = '$current_user_id' AND receiver_id = '$contact_id') 
                  OR (sender_id = '$contact_id' AND receiver_id = '$current_user_id') 
@@ -38,19 +38,18 @@ if ($action == 'get_messages') {
 }
 
 if ($action == 'send_message') {
-    $contact_id = isset($_POST['contact_id']) ? (int)$_POST['contact_id'] : 0;
+    $contact_id = isset($_POST['contact_id']) ? (int) $_POST['contact_id'] : 0;
     $msg_content = isset($_POST['message_text']) ? trim($_POST['message_text']) : '';
-    
+
     if (!$contact_id || empty($msg_content)) {
         echo json_encode(['status' => 'error', 'message' => 'Invalid data']);
         exit;
     }
-    
+
     $msg_content = $conn->real_escape_string($msg_content);
-    
-    // Save user message
+
     $conn->query("INSERT INTO messages (sender_id, receiver_id, message) VALUES ('$current_user_id', '$contact_id', '$msg_content')");
-    
+
     echo json_encode(['status' => 'success']);
     exit;
 }

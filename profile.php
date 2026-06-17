@@ -1,18 +1,13 @@
 <?php
 session_start();
-// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
 $theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 
-// ... sisa require_once dan logika database yang sudah ada ...
 require_once 'classes/User.php';
 require_once 'classes/Post.php';
-require_once 'classes/Interaction.php'; // Tambahkan ini
-
+require_once 'classes/Interaction.php';
 $userObj = new User();
 $postObj = new Post();
-$interactionObj = new Interaction(); // Inisialisasi
-
-// Cek apakah ada parameter username di URL (Metode GET)
+$interactionObj = new Interaction();
 if (!isset($_GET['username']) || empty($_GET['username'])) {
     header("Location: home.php");
     exit;
@@ -20,15 +15,12 @@ if (!isset($_GET['username']) || empty($_GET['username'])) {
 
 $username = $_GET['username'];
 
-// === TAMBAHKAN BLOK LOGIKA HAPUS INI ===
 if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
     $post_id = $_GET['delete_id'];
     $user_id = $_SESSION['user_id'];
 
-    // Eksekusi fungsi hapus dari objek post
     $postObj->deletePost($post_id, $user_id);
 
-    // Refresh dan kembalikan ke profil user yang sama agar tidak error
     header("Location: profile.php?username=" . urlencode($username));
     exit;
 }
@@ -40,8 +32,7 @@ if (isset($_GET['like_id'])) {
     }
 
     $interactionObj->toggleLike($_SESSION['user_id'], $_GET['like_id']);
-    header("Location: profile.php?username=" . urlencode($username)); // Kembali ke halaman profil
-    exit;
+    header("Location: profile.php?username=" . urlencode($username));    exit;
 }
 
 if (isset($_GET['save_id'])) {
@@ -54,17 +45,14 @@ if (isset($_GET['save_id'])) {
     header("Location: profile.php?username=" . urlencode($username));
     exit;
 }
-// ======================================
 
 $profile_data = $userObj->getUserByUsername($username);
 
-// Jika username tidak ditemukan di database
 if (!$profile_data) {
     echo "<h2>Meow-af, Akun tidak ditemukan!</h2><a href='home.php'>Kembali</a>";
     exit;
 }
 
-// Ambil postingan khusus user ini
 $user_posts = $postObj->getPostsByUserId($profile_data['id']);
 ?>
 
@@ -75,6 +63,7 @@ $user_posts = $postObj->getPostsByUserId($profile_data['id']);
 <head>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($profile_data['name']); ?> (@<?php echo htmlspecialchars($profile_data['username']); ?>) / Meower</title>
+    <link rel="icon" type="image/png" href="uploads/logo.png">
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

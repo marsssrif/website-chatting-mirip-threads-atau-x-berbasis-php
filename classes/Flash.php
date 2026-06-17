@@ -10,7 +10,7 @@ class Flash
     {
         if (isset($_SESSION['flash'])) {
             $data = $_SESSION['flash'];
-            unset($_SESSION['flash']); // Hapus setelah diambil
+            unset($_SESSION['flash']);
             return $data;
         }
         return null;

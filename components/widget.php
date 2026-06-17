@@ -1,12 +1,9 @@
 <?php
-// Pastikan kita menyertakan class User jika belum di-include di file utama
 require_once __DIR__ . '/../classes/User.php';
 $widgetUserObj = new User();
 
-// Ambil 3 besar user dengan likes terbanyak
 $top_meowers = $widgetUserObj->getTopLikedUsers(3);
 
-// Ambil kata kunci pencarian saat ini jika ada
 $search_value = isset($_GET['search']) ? $_GET['search'] : '';
 ?>
 

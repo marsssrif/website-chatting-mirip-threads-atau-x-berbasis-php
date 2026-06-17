@@ -1,17 +1,14 @@
 <?php
 session_start();
-// Membaca cookie preferensi tema (Default: light)
 $theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 
 require_once 'classes/User.php';
 require_once 'classes/Post.php';
 require_once 'classes/Interaction.php';
-require_once 'classes/Flash.php'; // Pastikan class Flash di-include
-
+require_once 'classes/Flash.php';
 $postObj = new Post();
 $interactionObj = new Interaction();
 
-// Cek apakah ada parameter ID post di URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: home.php");
     exit;
@@ -20,13 +17,11 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $post_id = $_GET['id'];
 $main_post = $postObj->getPostById($post_id);
 
-// Jika post tidak ditemukan / sudah dihapus
 if (!$main_post) {
     echo "<h2>Meow-af, Postingan tidak ditemukan!</h2><a href='home.php'>Kembali</a>";
     exit;
 }
 
-// Penangkap aksi hapus (Meow Utama maupun Balasan)
 if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
     $id_to_delete = $_GET['delete_id'];
     $user_id = $_SESSION['user_id'];
@@ -42,7 +37,6 @@ if (isset($_GET['delete_id']) && isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Menangkap proses submit balasan (Reply)
 if (isset($_POST['submit_reply']) && isset($_SESSION['user_id'])) {
     $content = $_POST['content'];
     $user_id = $_SESSION['user_id'];
@@ -53,7 +47,6 @@ if (isset($_POST['submit_reply']) && isset($_SESSION['user_id'])) {
     }
 }
 
-// Penangkap aksi Like khusus di halaman ini
 if (isset($_GET['like_id'])) {
     if (!isset($_SESSION['user_id'])) {
         echo "<script>alert('Silakan login untuk menyukai!'); window.location.href='login.php';</script>";
@@ -64,7 +57,6 @@ if (isset($_GET['like_id'])) {
     exit;
 }
 
-// Penangkap aksi Save khusus di halaman ini
 if (isset($_GET['save_id'])) {
     if (!isset($_SESSION['user_id'])) {
         echo "<script>alert('Silakan login untuk menyimpan!'); window.location.href='login.php';</script>";
@@ -75,7 +67,6 @@ if (isset($_GET['save_id'])) {
     exit;
 }
 
-// Ambil semua balasan
 $replies = $postObj->getRepliesByPostId($post_id);
 ?>
 
@@ -86,6 +77,7 @@ $replies = $postObj->getRepliesByPostId($post_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meow by <?php echo (isset($main_post['is_ghost']) && $main_post['is_ghost'] == 1) ? 'Ghost 👻' : htmlspecialchars($main_post['name']); ?></title>
+    <link rel="icon" type="image/png" href="uploads/logo.png">
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

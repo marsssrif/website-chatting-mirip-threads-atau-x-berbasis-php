@@ -1,9 +1,7 @@
 <?php
 session_start();
-// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
 $theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 
-// Proteksi halaman: Pengunjung Wajib Login!
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -17,7 +15,6 @@ $interactionObj = new Interaction();
 
 $current_user_id = $_SESSION['user_id'];
 
-// Aksi Hapus Meow (dari timeline Saved)
 if (isset($_GET['delete_id'])) {
     $post_id = $_GET['delete_id'];
     $postObj->deletePost($post_id, $current_user_id);
@@ -25,21 +22,18 @@ if (isset($_GET['delete_id'])) {
     exit;
 }
 
-// Aksi Like / Unlike dari timeline Saved
 if (isset($_GET['like_id'])) {
     $interactionObj->toggleLike($current_user_id, $_GET['like_id']);
     header("Location: saved.php");
     exit;
 }
 
-// Aksi Unsave dari timeline Saved
 if (isset($_GET['save_id'])) {
     $interactionObj->toggleSave($current_user_id, $_GET['save_id']);
     header("Location: saved.php");
     exit;
 }
 
-// Ambil semua postingan yang disimpan (bookmarked) oleh user
 $all_posts = $interactionObj->getSavedPostsByUser($current_user_id);
 ?>
 
@@ -50,6 +44,7 @@ $all_posts = $interactionObj->getSavedPostsByUser($current_user_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saved / Meower</title>
+    <link rel="icon" type="image/png" href="uploads/logo.png">
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

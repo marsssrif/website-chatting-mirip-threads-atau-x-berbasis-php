@@ -1,9 +1,7 @@
 <?php
 session_start();
-// Ambil data cookie tema, jika belum disetel default-nya adalah 'light'
 $theme_preference = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : 'light';
 
-// Proteksi halaman: Pengunjung Wajib Login!
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -15,33 +13,26 @@ $conn = $db->getConnection();
 
 $current_user_id = $_SESSION['user_id'];
 
-// 1. Total Meows (Normal)
 $q_meows = $conn->query("SELECT COUNT(*) as total FROM posts WHERE user_id = '$current_user_id' AND parent_id IS NULL AND is_ghost = 0");
 $normal_meows = $q_meows->fetch_assoc()['total'];
 
-// 2. Total Ghost Meows
 $q_ghost = $conn->query("SELECT COUNT(*) as total FROM posts WHERE user_id = '$current_user_id' AND parent_id IS NULL AND is_ghost = 1");
 $ghost_meows = $q_ghost->fetch_assoc()['total'];
 
 $total_meows = $normal_meows + $ghost_meows;
 
-// 3. Total Replies
 $q_replies = $conn->query("SELECT COUNT(*) as total FROM posts WHERE user_id = '$current_user_id' AND parent_id IS NOT NULL");
 $total_replies = $q_replies->fetch_assoc()['total'];
 
-// 4. Likes Received
 $q_likes_rec = $conn->query("SELECT COUNT(likes.id) as total FROM likes JOIN posts ON likes.post_id = posts.id WHERE posts.user_id = '$current_user_id'");
 $likes_received = $q_likes_rec->fetch_assoc()['total'];
 
-// 5. Likes Given
 $q_likes_given = $conn->query("SELECT COUNT(*) as total FROM likes WHERE user_id = '$current_user_id'");
 $likes_given = $q_likes_given->fetch_assoc()['total'];
 
-// 6. Bookmarked Posts
 $q_saved = $conn->query("SELECT COUNT(*) as total FROM saved_posts WHERE user_id = '$current_user_id'");
 $total_saved = $q_saved->fetch_assoc()['total'];
 
-// Hitung persentase untuk chart
 $percent_normal = $total_meows > 0 ? round(($normal_meows / $total_meows) * 100) : 0;
 $percent_ghost = $total_meows > 0 ? round(($ghost_meows / $total_meows) * 100) : 0;
 ?>
@@ -53,6 +44,7 @@ $percent_ghost = $total_meows > 0 ? round(($ghost_meows / $total_meows) * 100) :
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insights / Meower</title>
+    <link rel="icon" type="image/png" href="uploads/logo.png">
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
